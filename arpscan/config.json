@@ -1,1 +1,38 @@
-
+{
+  "name": "ARP-Scan MQTT Network Discovery",
+  "version": "2.0.5",
+  "slug": "arpscan",
+  "description": "Scannt das lokale Netzwerk per ARP und meldet jedes Gerät als MQTT-Entity (online/offline + Attribute).",
+  "arch": ["amd64"],
+  "startup": "services",
+  "boot": "auto",
+  "init": false,
+  "host_network": true,
+  "full_access": true,
+  "privileged": ["NET_ADMIN", "NET_RAW"],
+  "map": ["share:rw"],
+  "options": {
+    "interface": "auto",
+    "host_ip": "",
+    "scan_interval": 60,
+    "online_timeout": 180,
+    "mqtt_host": "192.168.10.5",
+    "mqtt_port": 1883,
+    "mqtt_user": "homeassistant",
+    "mqtt_password": "geheim",
+    "mqtt_base_topic": "home/arp_scan/devices",
+    "mqtt_discovery_prefix": "homeassistant"
+  },
+  "schema": {
+    "interface": "str",
+    "host_ip": "str",
+    "scan_interval": "int",
+    "online_timeout": "int",
+    "mqtt_host": "str",
+    "mqtt_port": "int",
+    "mqtt_user": "str",
+    "mqtt_password": "str",
+    "mqtt_base_topic": "str",
+    "mqtt_discovery_prefix": "str"
+  }
+}
