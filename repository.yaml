@@ -1,0 +1,4 @@
+# https://developers.home-assistant.io/docs/add-ons/repository#repository-configuration
+name: Pascals Home Assistant Add-ons
+url: 'https://github.com/pascalschmiederer/home-assistant-addons'
+maintainer: Pascal Schmiederer
