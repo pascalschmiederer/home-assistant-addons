@@ -1,6 +1,6 @@
 {
   "name": "ARP-Scan MQTT Network Discovery",
-  "version": "2.1.1",
+  "version": "2.1.2",
   "slug": "arpscan",
   "description": "Scannt das lokale Netzwerk per ARP und meldet jedes Gerät als MQTT-Entity (online/offline + Attribute).",
   "arch": ["amd64"],
