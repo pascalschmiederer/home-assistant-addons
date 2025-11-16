@@ -526,7 +526,7 @@ while true; do
   now_iso=$(date --iso-8601=seconds)
   log "Starte ARP-Scan…"
 
-  SCAN=$(/usr/bin/arp-scan --localnet --interface="$IFACE" 2>/dev/null || true)
+  SCAN=$(/usr/bin/arp-scan --localnet --ignoredups --retry=3 --interface="$IFACE" 2>/dev/null || true)
 
   echo "$SCAN" | while read -r line; do
     ip=$(echo "$line" | awk '{print $1}')
