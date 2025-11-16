@@ -393,6 +393,75 @@ update_device_state() {
   publish_discovery "$mac" "$mac_norm" "$hostname"
 }
 
+publish_network_overview_discovery() {
+  local disc_file="${DATA_DIR}/discovery_network_overview.done"
+  if [ -f "$disc_file" ]; then
+    return
+  fi
+
+  local unique_id="arp_scan_network_overview"
+  local state_topic="${MQTT_BASE_TOPIC}/_overview"
+
+  local payload
+  payload=$(jq -n \
+    --arg name "Netzwerkstatus" \
+    --arg unique_id "$unique_id" \
+    --arg state_topic "$state_topic" \
+    '{
+       name: $name,
+       unique_id: $unique_id,
+       state_topic: $state_topic,
+       value_template: "{{ value_json.online_devices }}",
+       unit_of_measurement: "Geräte",
+       icon: "mdi:lan",
+       json_attributes_topic: $state_topic,
+       json_attributes_template: "{{ value_json | tojson }}",
+       device: {
+         identifiers: ["arp_scan_network_overview"],
+         name: "ARP Netzwerkübersicht",
+         model: "ARP Network Overview",
+         manufacturer: "Custom ARP Scanner"
+       }
+     }')
+
+  mqtt_pub "${MQTT_DISC_PREFIX}/sensor/${unique_id}/config" "$payload"
+  touch "$disc_file"
+  log "Discovery für Netzwerkstatus gesendet"
+}
+
+publish_network_overview_state() {
+  local files=("$DATA_DIR"/*.json)
+
+  # Wenn noch keine Geräte existieren: nichts tun
+  if [ ! -e "${files[0]}" ]; then
+    return
+  fi
+
+  local overview
+  overview=$(jq -s '
+    (map({
+      key: (
+        if (.hostname // "") != "" then .hostname
+        elif (.ip // "") != "" then .ip
+        else .mac end
+      ),
+      online: (.online // false)
+    })) as $devs
+    | {
+        total_devices: ($devs | length),
+        online_devices: ($devs | map(select(.online == true)) | length),
+        offline_devices: ($devs | map(select(.online != true)) | length),
+        devices: (
+          $devs
+          | map({ (.key): .online })
+          | add
+        )
+      }' "${files[@]}" 2>/dev/null) || return 0
+
+  mqtt_pub "${MQTT_BASE_TOPIC}/_overview" "$overview"
+}
+
+
 mark_offline_devices() {
   local now_epoch
   now_epoch=$(date +%s)
@@ -451,6 +520,8 @@ mark_offline_devices() {
 
 log "Interface: $IFACE, MQTT: $MQTT_HOST:$MQTT_PORT"
 
+publish_network_overview_discovery
+
 while true; do
   now_iso=$(date --iso-8601=seconds)
   log "Starte ARP-Scan…"
@@ -466,6 +537,7 @@ while true; do
   done
 
   mark_offline_devices
+  publish_network_overview_state
 
   log "Warte ${SCAN_INTERVAL}s…"
   sleep "$SCAN_INTERVAL"
