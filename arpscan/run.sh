@@ -75,7 +75,7 @@ shorten_hostname() {
 
 ping_ms() {
   local ip="$1"
-  ping -c 1 -W 1 "$ip" 2>/dev/null | awk -F'time=' '/time=/{print $2}' | awk '{print $1}' | head -n1
+  ping -c 2 -W 3 "$ip" 2>/dev/null | awk -F'time=' '/time=/{print $2}' | awk '{print $1}' | head -n1
 }
 
 detect_iface_by_host_ip() {
